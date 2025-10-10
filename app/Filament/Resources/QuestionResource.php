@@ -36,6 +36,7 @@ class QuestionResource extends Resource
 
                 // ✅ حقل اختيار التصنيف
                  BelongsToSelect::make('category_id')
+                 
                     ->label('التصنيف')
                     ->relationship('category', 'name')
                     ->required(),
