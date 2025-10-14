@@ -43,8 +43,12 @@ class GameSessionController extends Controller
 {
     $contestants = $gameSession->contestants;
 
+     if ($gameSession->created_by !== auth::id()) {
+        abort(403, '❌ لا يمكنك الدخول إلى جلسة لا تخصك.');
+    }
+
     
-    $questions = Question::inRandomOrder()->take(5)->get();
+    $questions = Question::paginate(5);
 
     return view('game_sessions.play', compact('gameSession', 'contestants', 'questions'));
 }
