@@ -11,7 +11,7 @@ class QuestionSeeder extends Seeder
     public function run(): void
     {
 
-        $response = Http::get('https://opentdb.com/api.php?amount=9&type=multiple');
+        $response = Http::get('https://opentdb.com/api.php?amount=20&category=21&difficulty=hard&type=multiple');
 
         $data = $response->json();
 
@@ -33,11 +33,16 @@ class QuestionSeeder extends Seeder
             $translatedAnswer = $translatedAnswer ?: $originalAnswer;
 
             // حفظ بالسجلات
-            Question::create([
-                'question' => $translatedQuestion,
+             try{ Question::create([
+                'question' => $translatedQuestion . " / " . $originalQuestion,
                 'category_id' => 1,
-                'answer' => $translatedAnswer,
-            ]);
+                'answer' => $translatedAnswer . " / " . $originalAnswer,
+            ]);}
+             catch (\Exception $e) {
+                $this->command->error("خطأ في حفظ السؤال: " . $e->getMessage());
+                continue; // تخطي في حالة أي خطأ آخر
+
+            }
 
         }
 

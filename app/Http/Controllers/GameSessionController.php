@@ -48,8 +48,7 @@ class GameSessionController extends Controller
     }
 
     
-    $questions = Question::paginate(5);
-
+   $questions = Question::inRandomOrder()->paginate(10);
     return view('game_sessions.play', compact('gameSession', 'contestants', 'questions'));
 }
 
