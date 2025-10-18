@@ -11,7 +11,7 @@ class QuestionSeeder extends Seeder
     public function run(): void
     {
 
-        $response = Http::get('https://opentdb.com/api.php?amount=20&category=21&difficulty=hard&type=multiple');
+        $response = Http::get('https://opentdb.com/api.php?amount=5&category=25&difficulty=hard&type=multiple');
 
         $data = $response->json();
 
@@ -35,7 +35,7 @@ class QuestionSeeder extends Seeder
             // حفظ بالسجلات
              try{ Question::create([
                 'question' => $translatedQuestion . " / " . $originalQuestion,
-                'category_id' => 1,
+                'category_id' => 6,
                 'answer' => $translatedAnswer . " / " . $originalAnswer,
             ]);}
              catch (\Exception $e) {

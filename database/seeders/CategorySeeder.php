@@ -12,9 +12,12 @@ class CategorySeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void
-    {
-        Category::Create([
-            'name'=>'المعلومات العامة'
-        ]);
+    {   $categories = ['التاريخ','المعلومات العامة', 'العلوم والطبيعة','رياضة','جغرافيا','فن'];
+
+        foreach ($categories as $category) {
+            Category::Create([
+                'name' => $category,
+            ]);
+        }
     }
 }

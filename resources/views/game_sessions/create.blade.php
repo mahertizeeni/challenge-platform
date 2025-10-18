@@ -19,32 +19,12 @@
             padding: 20px;
         }
 
-        @media (max-width: 600px) {
-            body {
-                padding: 15px;
-            }
-
-            .container {
-                padding: 15px;
-            }
-
-            button {
-                padding: 5px 8px;
-                font-size: 14px;
-            }
-
-            .pagination .page-link {
-                padding: 4px 8px;
-                font-size: 13px;
-            }
-        }
-
         .container {
             background: white;
             border-radius: 25px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             width: 100%;
-            max-width: 450px;
+            max-width: 480px;
             padding: 30px;
             text-align: center;
             animation: fadeIn 0.8s ease-in-out;
@@ -106,6 +86,61 @@
             margin-bottom: 10px;
         }
 
+        .add-btn {
+            background: #ffb300;
+            color: #222;
+        }
+
+        .add-btn:hover {
+            background: #ffc93c;
+        }
+
+        .categories {
+            text-align: right;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+        }
+
+        .categories label {
+            display: block;
+            margin: 8px 0;
+            font-weight: normal;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .categories label:hover {
+            background: #f0f8ff;
+        }
+
+        .category-checkbox {
+            margin-left: 8px;
+        }
+
+        .selected-categories {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-align: right;
+        }
+
+        .selected-categories h4 {
+            margin: 0 0 8px 0;
+            color: #555;
+        }
+
+        .selected-list {
+            font-size: 14px;
+            color: #666;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -117,32 +152,6 @@
                 transform: translateY(0);
             }
         }
-
-        /* مظهر مخصص لزر إضافة لاعب */
-        .add-btn {
-            background: #ffb300;
-            color: #222;
-        }
-
-        .add-btn:hover {
-            background: #ffc93c;
-        }
-
-        /* تحسين عرض الموبايل */
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-                border-radius: 20px;
-            }
-
-            h2 {
-                font-size: 22px;
-            }
-
-            button {
-                font-size: 15px;
-            }
-        }
     </style>
 </head>
 
@@ -151,7 +160,7 @@
     <div class="container">
         <h2>🎮 إنشاء لعبة جديدة</h2>
 
-        <form action="{{ route('game_sessions.store') }}" method="POST">
+        <form action="{{ route('game_sessions.store') }}" method="POST" id="gameForm">
             @csrf
 
             <label>اسم اللعبة:</label>
@@ -164,7 +173,25 @@
 
             <button type="button" class="add-btn" onclick="addPlayer()">➕ إضافة لاعب</button>
 
-            <br><br>
+            <h3>🧩 اختر التصنيفات (اختياري):</h3>
+
+            <!-- عرض التصنيفات المختارة -->
+            <div class="selected-categories" id="selectedCategories" style="display: none;">
+                <h4>التصنيفات المختارة:</h4>
+                <div class="selected-list" id="selectedList"></div>
+            </div>
+
+            <div class="categories">
+                @foreach ($categories as $category)
+                    <label>
+                        <input type="checkbox" name="categories[]" value="{{ $category->id }}" class="category-checkbox"
+                            onchange="updateSelectedCategories()">
+                        {{ $category->name }}
+                    </label>
+                @endforeach
+            </div>
+
+            <br>
             <button type="submit">🚀 بدء اللعبة</button>
         </form>
     </div>
@@ -178,6 +205,62 @@
             div.innerHTML = `<input type="text" name="players[]" placeholder="اسم اللاعب ${playerCount}" required>`;
             document.getElementById('players').appendChild(div);
         }
+
+        // تحديث التصنيفات المختارة
+        function updateSelectedCategories() {
+            const checkboxes = document.querySelectorAll('.category-checkbox:checked');
+            const selectedList = document.getElementById('selectedList');
+            const selectedContainer = document.getElementById('selectedCategories');
+
+            if (checkboxes.length > 0) {
+                let selectedNames = [];
+                checkboxes.forEach(checkbox => {
+                    // الحصول على اسم التصنيف من النص المجاور
+                    const categoryName = checkbox.parentElement.textContent.trim();
+                    selectedNames.push(categoryName);
+                });
+
+                selectedList.innerHTML = selectedNames.join('، ');
+                selectedContainer.style.display = 'block';
+            } else {
+                selectedContainer.style.display = 'none';
+            }
+        }
+
+        // التحقق من صحة النموذج قبل الإرسال
+        document.getElementById('gameForm').addEventListener('submit', function(e) {
+            const gameName = document.querySelector('input[name="game_name"]').value.trim();
+            const playerInputs = document.querySelectorAll('input[name="players[]"]');
+
+            // التحقق من أن اسم اللعبة غير فارغ
+            if (!gameName) {
+                e.preventDefault();
+                alert('يرجى إدخال اسم اللعبة');
+                return;
+            }
+
+            // التحقق من أن جميع أسماء اللاعبين غير فارغة
+            let validPlayers = true;
+            playerInputs.forEach(input => {
+                if (!input.value.trim()) {
+                    validPlayers = false;
+                    input.style.borderColor = 'red';
+                } else {
+                    input.style.borderColor = '#ddd';
+                }
+            });
+
+            if (!validPlayers) {
+                e.preventDefault();
+                alert('يرجى إدخال جميع أسماء اللاعبين');
+                return;
+            }
+
+            // إظهار رسالة تحميل
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '⏳ جاري إنشاء اللعبة...';
+            submitBtn.disabled = true;
+        });
     </script>
 
 </body>

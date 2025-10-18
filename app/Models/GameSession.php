@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class GameSession extends Model
 {
-    protected $fillable = ['name','created_by'];
+    protected $fillable = ['name','created_by','categories'];
+
+    protected $casts = [
+    'categories' => 'array',
+];
+
 
     public function creator()
     {
